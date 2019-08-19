@@ -2,6 +2,7 @@ from flask import (
     Flask,
     render_template
 )
+import requests, zipfile, io, os
 import connexion
 from keras.models import load_model
 from keras.preprocessing import image
@@ -30,14 +31,25 @@ def home():
     """
     return render_template('home.html')
 
-@app.route('/predict', methods=['GET'])
-def diagnose():
+@app.route('/predict/<farm_id>', methods=['GET'])
+def diagnose(farm_id):
     IMAGE_WIDTH=128
     IMAGE_HEIGHT=128
     IMAGE_SIZE=(IMAGE_WIDTH, IMAGE_HEIGHT)
     IMAGE_CHANNELS=3
 
-    test_filenames = os.listdir("/home/sheila/Desktop/Learning_data_science/crop check/images/test1")
+    path = "http://198.211.102.248/app-server/public/api/zip/"
+    fullpath = path + farm_id
+    current_directory = os.getcwd()
+    zips_folder = current_directory + "/"+farm_id
+
+    r = requests.get(path+farm_id)
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    z.extractall(zips_folder)
+
+
+    # test_filenames = os.listdir("/home/sheila/Desktop/Learning_data_science/crop check/images/test1")
+    test_filenames = os.listdir(zips_folder)
 
     test_df = pd.DataFrame({
         'filename': test_filenames
@@ -48,7 +60,7 @@ def diagnose():
     test_gen = ImageDataGenerator(rescale=1./255)
     test_generator = test_gen.flow_from_dataframe(
     test_df, 
-    "/home/sheila/Desktop/Learning_data_science/crop check/images/test1/", 
+    zips_folder, 
     x_col='filename',
     y_col=None,
     class_mode=None,
@@ -64,11 +76,11 @@ def diagnose():
     d = test_df.to_dict(orient='records')
     j = json.dumps(d)
 
-    submission_df = test_df.copy()
-    submission_df['id'] = submission_df['filename'].str.split('.').str[0]
-    submission_df['label'] = submission_df['category']
-    submission_df.drop(['filename', 'category'], axis=1, inplace=True)
-    submission_df.to_csv('submission_test1.csv', index=False)
+    # submission_df = test_df.copy()
+    # submission_df['id'] = submission_df['filename'].str.split('.').str[0]
+    # submission_df['label'] = submission_df['category']
+    # submission_df.drop(['filename', 'category'], axis=1, inplace=True)
+    # submission_df.to_csv('submission_test1.csv', index=False)
     print(j)
 
     # return [j[key] for key in sorted(j.keys())]
