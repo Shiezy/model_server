@@ -1,6 +1,6 @@
 from flask import (
     Flask,
-    render_template
+    render_template,
     request
 )
 import requests, zipfile, io, os
@@ -42,12 +42,12 @@ def diagnose():
     IMAGE_SIZE=(IMAGE_WIDTH, IMAGE_HEIGHT)
     IMAGE_CHANNELS=3
     
-    path = "http://localhost/app-server/public/api/zip/"
+    path = "http://198.211.102.248/app-server/public/api/zip/"
     fullpath = path + season_id
     current_directory = os.getcwd()
     zips_folder = current_directory + "/"+season_id
 
-    r = requests.get(path+farm_id)
+    r = requests.get(path+season_id)
     z = zipfile.ZipFile(io.BytesIO(r.content))
     z.extractall(zips_folder)
 
