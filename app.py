@@ -1,6 +1,7 @@
 from flask import (
     Flask,
     render_template
+    request
 )
 import requests, zipfile, io, os
 import connexion
@@ -31,17 +32,20 @@ def home():
     """
     return render_template('home.html')
 
-@app.route('/predict/<farm_id>', methods=['GET'])
-def diagnose(farm_id):
+@app.route('/predict', methods=['GET'])
+def diagnose():
+    season_id = request.args.get('season_id')
+    # season_id.str()
+   
     IMAGE_WIDTH=128
     IMAGE_HEIGHT=128
     IMAGE_SIZE=(IMAGE_WIDTH, IMAGE_HEIGHT)
     IMAGE_CHANNELS=3
-
-    path = "http://198.211.102.248/app-server/public/api/zip/"
-    fullpath = path + farm_id
+    
+    path = "http://localhost/app-server/public/api/zip/"
+    fullpath = path + season_id
     current_directory = os.getcwd()
-    zips_folder = current_directory + "/"+farm_id
+    zips_folder = current_directory + "/"+season_id
 
     r = requests.get(path+farm_id)
     z = zipfile.ZipFile(io.BytesIO(r.content))
