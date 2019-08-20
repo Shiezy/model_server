@@ -34,7 +34,8 @@ def home():
 
 @app.route('/predict', methods=['GET'])
 def diagnose():
-    season_id = request.args.get('season_id')
+    s = str(request.args.get('season_id'))
+    season_id = s
     # season_id.str()
    
     IMAGE_WIDTH=128
